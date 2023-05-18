@@ -1,5 +1,7 @@
 import tkinter as tk
 from tkinter import ttk
+from tkinter import filedialog
+from PIL import ImageTk, Image
 
 # --------------- GUI window
 
@@ -36,6 +38,17 @@ filteredPhotoFrame = ttk.Frame(photosFrame, width=420, height=350, style='filter
 filteredPhotoFrame.grid(row=1, column=2, padx=10, pady=10)
 
 loadFileButton = ttk.Button(loadImageFrame, text="Wczytaj zdjęcie", style='custom.TButton')
+def load_image_to_container():
+    file_path = filedialog.askopenfilename()
+    if file_path:
+        image = Image.open(file_path)
+        resized_image = image.resize((400, 300), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(resized_image)
+        image_label = ttk.Label(originalPhotoFrame, image=photo)
+        image_label.photo = photo
+        image_label.pack(fill='both', expand=True)
+
+loadFileButton.config(command=load_image_to_container)
 loadFileButton.grid(row=1, column=1, padx=10, pady=10)
 
 saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton')
