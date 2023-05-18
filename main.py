@@ -2,6 +2,8 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import ImageTk, Image
+from load_file import loadFile;
+from functools import partial;
 
 # --------------- GUI window
 
@@ -13,7 +15,7 @@ styles = ttk.Style()
 styles.configure('mainFrame.TFrame', background='#e9ecef')
 styles.configure('loadImageFrame.TFrame', background='#e9ecef', height=420)
 styles.configure('buttonsFrame.TFrame', background='#e9ecef')
-styles.configure('originalPhotosFrame.TFrame', background='blue')
+styles.configure('originalPhotosFrame.TFrame', background='#e9ecef')
 styles.configure('filteredPhotosFrame.TFrame', background='green')
 styles.configure('custom.TButton', bg='#c1121f', foreground='black', padding=5, border=10, width=20)
 
@@ -37,22 +39,16 @@ originalPhotoFrame.grid(row=1, column=1, padx=10, pady=10)
 filteredPhotoFrame = ttk.Frame(photosFrame, width=420, height=350, style='filteredPhotosFrame.TFrame')
 filteredPhotoFrame.grid(row=1, column=2, padx=10, pady=10)
 
-loadFileButton = ttk.Button(loadImageFrame, text="Wczytaj zdjęcie", style='custom.TButton')
-def load_image_to_container():
-    file_path = filedialog.askopenfilename()
-    if file_path:
-        image = Image.open(file_path)
-        resized_image = image.resize((400, 300), Image.LANCZOS)
-        photo = ImageTk.PhotoImage(resized_image)
-        image_label = ttk.Label(originalPhotoFrame, image=photo)
-        image_label.photo = photo
-        image_label.pack(fill='both', expand=True)
+# --------------- BUTTONS
 
-loadFileButton.config(command=load_image_to_container)
+loadFileButton = ttk.Button(loadImageFrame, text="Wczytaj zdjęcie", style='custom.TButton')
 loadFileButton.grid(row=1, column=1, padx=10, pady=10)
 
 saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton')
-saveFileButton.grid(row=2, column=1, padx=10, pady=10)
+saveFileButton.grid(row=3, column=1, padx=10, pady=10)
+
+filterButton = ttk.Button(loadImageFrame, text="Filtruj", style='custom.TButton')
+filterButton.grid(row=2, column=1, padx=10, pady=10)
 
 changToEnglishButton = ttk.Button(buttonsFrame, text="Angielski", style='custom.TButton')
 changToEnglishButton.grid(row=1, column=1, padx=10, pady=10)
@@ -63,10 +59,12 @@ blackAndWhiteButton.grid(row=1, column=2, padx=10, pady=10)
 normalizeButton = ttk.Button(buttonsFrame, text="Normalizacja", style='custom.TButton')
 normalizeButton.grid(row=1, column=3, padx=10, pady=10)
 
+# --------------- CODE
+
+loadFileButton.config(command=partial(loadFile, originalPhotoFrame))
+
 # --------------- GRID CONFIGURATIONS
-
-
-
 
 root.resizable(width = False, height = False)
 root.mainloop()
+
