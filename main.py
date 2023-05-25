@@ -2,12 +2,21 @@ import tkinter as tk
 from tkinter import ttk
 from tkinter import filedialog
 from PIL import ImageTk, Image
-from load_file import loadFile;
-from functools import partial;
+from load_file import loadFile
+from functools import partial
+from gray_scale import convertToGrayscale, displayGrayscale
 
 # --------------- GUI window
 
 root = tk.Tk();
+
+masksOptions = ["maska 1","maska 1", "maska 2", "maska 3", "maska 4"]
+choosenMasksOption = tk.StringVar(root)
+choosenMasksOption.set(masksOptions[0])
+
+normalizationOptions = ["Bezwzgledna","Bezwzgledna", "Skalowana", "Z obcieciem"]
+choosenNormalizationOption = tk.StringVar(root)
+choosenNormalizationOption.set(normalizationOptions[0])
 
 # --------------- STYLING
 
@@ -41,27 +50,31 @@ filteredPhotoFrame.grid(row=1, column=2, padx=10, pady=10)
 
 # --------------- BUTTONS
 
-loadFileButton = ttk.Button(loadImageFrame, text="Wczytaj zdjęcie", style='custom.TButton')
-loadFileButton.grid(row=1, column=1, padx=10, pady=10)
+changeToEnglishButton = ttk.Button(loadImageFrame, text="Angielski", style='custom.TButton')
+changeToEnglishButton.grid(row=1, column=1, padx=10, pady=10)
 
-saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton')
-saveFileButton.grid(row=3, column=1, padx=10, pady=10)
+loadFileButton = ttk.Button(loadImageFrame, text="Wczytaj zdjęcie", style='custom.TButton')
+loadFileButton.grid(row=2, column=1, padx=10, pady=10)
 
 filterButton = ttk.Button(loadImageFrame, text="Filtruj", style='custom.TButton')
-filterButton.grid(row=2, column=1, padx=10, pady=10)
+filterButton.grid(row=3, column=1, padx=10, pady=10)
 
-changToEnglishButton = ttk.Button(buttonsFrame, text="Angielski", style='custom.TButton')
-changToEnglishButton.grid(row=1, column=1, padx=10, pady=10)
+saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton')
+saveFileButton.grid(row=4, column=1, padx=10, pady=10)
 
 blackAndWhiteButton = ttk.Button(buttonsFrame, text="Czarno-Białe", style='custom.TButton')
-blackAndWhiteButton.grid(row=1, column=2, padx=10, pady=10)
+blackAndWhiteButton.grid(row=2, column=1, padx=10, pady=10)
 
-normalizeButton = ttk.Button(buttonsFrame, text="Normalizacja", style='custom.TButton')
-normalizeButton.grid(row=1, column=3, padx=10, pady=10)
+normalizeButton = ttk.OptionMenu(buttonsFrame, choosenNormalizationOption, *normalizationOptions, style='custom.TButton')
+normalizeButton.grid(row=2, column=2, padx=10, pady=10)
+
+masksMenu = ttk.OptionMenu(buttonsFrame, choosenMasksOption, *masksOptions, style='custom.TButton')
+masksMenu.grid(row=2, column=3, padx=10, pady=10)
 
 # --------------- CODE
 
 loadFileButton.config(command=partial(loadFile, originalPhotoFrame))
+blackAndWhiteButton.config(command=partial(displayGrayscale, originalPhotoFrame))
 
 # --------------- GRID CONFIGURATIONS
 
