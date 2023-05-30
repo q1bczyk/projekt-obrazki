@@ -5,16 +5,65 @@ from PIL import ImageTk, Image
 from load_file import loadFile
 from functools import partial
 from gray_scale import convertToGrayscale, displayGrayscale
+from PIL import Image, ImageOps
+
+
+# --------------- GLOBAL
+
+is_black_and_white = False
+original_image = None
+
+
+# --------------- FUNCTIONS
+
+def loadFile(container):
+    global original_image
+
+    file_path = filedialog.askopenfilename()
+    for widget in container.winfo_children():
+        widget.destroy()
+    if file_path:
+        image = Image.open(file_path)
+        resized_image = image.resize((400, 300), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(resized_image)
+        image_label = ttk.Label(container, image=photo)
+        image_label.photo = photo
+        image_label.pack(fill='both', expand=True)
+        original_image = resized_image.copy()
+
+
+def convertToBlackAndWhite(container):
+    global is_black_and_white, original_image
+
+    if is_black_and_white:
+        image_label = container.winfo_children()[0]
+        photo = ImageTk.PhotoImage(original_image)
+        image_label.configure(image=photo)
+        image_label.photo = photo
+        is_black_and_white = False
+    else:
+        image_label = container.winfo_children()[0]
+        photo = image_label.photo
+        image = ImageTk.getimage(photo)
+        grayscale_image = ImageOps.grayscale(image)
+        resized_image = grayscale_image.resize((400, 300), Image.LANCZOS)
+        photo = ImageTk.PhotoImage(resized_image)
+        image_label.configure(image=photo)
+        image_label.photo = photo
+        is_black_and_white = True
+
+
+
 
 # --------------- GUI window
 
 root = tk.Tk();
 
-masksOptions = ["maska 1","maska 1", "maska 2", "maska 3", "maska 4"]
+masksOptions = ["Maski","maska 1", "maska 2", "maska 3", "maska 4"]
 choosenMasksOption = tk.StringVar(root)
 choosenMasksOption.set(masksOptions[0])
 
-normalizationOptions = ["Bezwzgledna","Bezwzgledna", "Skalowana", "Z obcieciem"]
+normalizationOptions = ["Normalizacja","Bezwzgledna", "Skalowana", "Z obcieciem"]
 choosenNormalizationOption = tk.StringVar(root)
 choosenNormalizationOption.set(normalizationOptions[0])
 
@@ -74,7 +123,7 @@ masksMenu.grid(row=2, column=3, padx=10, pady=10)
 # --------------- CODE
 
 loadFileButton.config(command=partial(loadFile, originalPhotoFrame))
-blackAndWhiteButton.config(command=partial(displayGrayscale, originalPhotoFrame))
+blackAndWhiteButton.config(command=partial(convertToBlackAndWhite, originalPhotoFrame))
 
 # --------------- GRID CONFIGURATIONS
 
