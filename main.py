@@ -138,7 +138,7 @@ def changeLanguage():
         saveFileButton.config(text="Save Image")
         blackAndWhiteButton.config(text="Black & White")
         normalizeButton.config(text="Normalization")
-        masksOptions = ["Masks", "Laplace", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo"]
+        masksOptions = ["Masks", "Laplace 3x3", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo", "Prewitta pionowo", "Różnicowa"]
         choosenMasksOption.set(masksOptions[0])
         normalizationOptions = ["Normalization", "Absolute", "Scaled", "Trimmed"]
         choosenNormalizationOption.set(normalizationOptions[0])
@@ -152,7 +152,7 @@ def changeLanguage():
         saveFileButton.config(text="Zapisz zdjęcie")
         blackAndWhiteButton.config(text="Czarno-Białe")
         normalizeButton.config(text="Normalizacja")
-        masksOptions = ["Maski", "Laplace", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo"]
+        masksOptions = ["Maski", "Laplace 3x3", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo", "Prewitta pionowo","Różnicowa",]
         choosenMasksOption.set(masksOptions[0])
         normalizationOptions = ["Normalizacja", "Bezwzględna", "Skalowana", "Z obcięciem"]
         choosenNormalizationOption.set(normalizationOptions[0])
@@ -195,17 +195,23 @@ def applyFilter():
 
     mask = filterHandler.mask
     normalization = filterHandler.normalization
-    if mask == "Laplace":
-        kernel = [ 0, -1,  0, -1,  4, -1,  0, -1,  0]
+    if mask == "Laplace 3x3":
+        kernel = [0,  1,  0,  1,  -4,  1,  0,  1,  0]
         filtered_image = applyHighPassFilter(filtered_image, kernel)
     elif mask == "Sobela poziomo":
         kernel = [-1, -2, -1,  0,  0,  0,  1,  2,  1]
         filtered_image = applyHighPassFilter(filtered_image, kernel)
     elif mask == "Sobela pionowo":
-        kernel = [-1,  0,  1, -2,  0,  2, -1,  0,  1]
+        kernel = [-1,  0,  1,  -2,  0,  2,  -1,  0,  1]
         filtered_image = applyHighPassFilter(filtered_image, kernel)
     elif mask == "Prewitta poziomo":
+        kernel = [-1,  -1,  -1,  0,  0,  0,  1,  1,  1]
+        filtered_image = applyHighPassFilter(filtered_image, kernel)
+    elif mask == "Prewitta pionowo":
         kernel = [-1,  0,  1, -1,  0,  1, -1,  0,  1]
+        filtered_image = applyHighPassFilter(filtered_image, kernel)
+    elif mask == "Różnicowa":
+        kernel = [-1, -1, -1, -1, 8, -1, -1, -1, -1]
         filtered_image = applyHighPassFilter(filtered_image, kernel)
 
     if (normalization == "Absolute" or normalization == "Bezwzględna"):
@@ -237,7 +243,7 @@ def setFilter():
 
 root = tk.Tk()
 
-masksOptions = ["Maski", "Laplace", "Sobela poziomo", "Sobela pionowo", "Prewitta poziomo"]
+masksOptions = ["Maski", "Laplace 3x3", "Sobela poziomo", "Sobela pionowo", "Prewitta poziomo","Prewitta pionowo", "Różnicowa"]
 choosenMasksOption = tk.StringVar(root)
 choosenMasksOption.set(masksOptions[0])
 
