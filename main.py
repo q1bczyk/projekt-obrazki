@@ -102,7 +102,7 @@ def loadFile(container):
         widget.destroy()
     if file_path:
         image = Image.open(file_path)
-        resized_image = image.resize((400, 300), Image.LANCZOS)
+        resized_image = image.resize((400, 400), Image.LANCZOS)
         photo = ImageTk.PhotoImage(resized_image)
         image_label = ttk.Label(container, image=photo)
         image_label.photo = photo
@@ -123,7 +123,7 @@ def convertToBlackAndWhite(container):
         photo = image_label.photo
         image = ImageTk.getimage(photo)
         grayscale_image = ImageOps.grayscale(image)
-        resized_image = grayscale_image.resize((400, 300), Image.LANCZOS)
+        resized_image = grayscale_image.resize((400, 400), Image.LANCZOS)
         photo = ImageTk.PhotoImage(resized_image)
         image_label.configure(image=photo)
         image_label.photo = photo
@@ -138,7 +138,7 @@ def changeLanguage():
         saveFileButton.config(text="Save Image")
         blackAndWhiteButton.config(text="Black & White")
         normalizeButton.config(text="Normalization")
-        masksOptions = ["Maski", "Laplace", "Sobela poziomo", "Sobela pionowo", "Prewitta poziomo"]
+        masksOptions = ["Masks", "Laplace", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo"]
         choosenMasksOption.set(masksOptions[0])
         normalizationOptions = ["Normalization", "Absolute", "Scaled", "Trimmed"]
         choosenNormalizationOption.set(normalizationOptions[0])
@@ -152,7 +152,7 @@ def changeLanguage():
         saveFileButton.config(text="Zapisz zdjęcie")
         blackAndWhiteButton.config(text="Czarno-Białe")
         normalizeButton.config(text="Normalizacja")
-        masksOptions = ["Maski", "maska 1", "maska 2", "maska 3", "maska 4"]
+        masksOptions = ["Maski", "Laplace", "Sobela poziomo", "Sobela poziomo", "Prewitta poziomo"]
         choosenMasksOption.set(masksOptions[0])
         normalizationOptions = ["Normalizacja", "Bezwzględna", "Skalowana", "Z obcięciem"]
         choosenNormalizationOption.set(normalizationOptions[0])
@@ -219,7 +219,7 @@ def applyFilter():
         widget.destroy()
 
     if filtered_image:
-        resized_image = filtered_image.resize((400, 300), Image.LANCZOS)
+        resized_image = filtered_image.resize((400, 400), Image.LANCZOS)
         photo = ImageTk.PhotoImage(resized_image)
         image_label = ttk.Label(filteredPhotoFrame, image=photo)
         image_label.photo = photo
@@ -257,8 +257,13 @@ styles.configure('custom.TButton', bg='#c1121f', foreground='black', padding=5, 
 
 # --------------- WIDGETS
 
+
+
 mainFrame = ttk.Frame(root, width=1280, height=720, style='mainFrame.TFrame')
 mainFrame.grid(row=0, column=0)
+
+title_label = ttk.Label(mainFrame, text="Filtr górnoprzepustowy", font=("Arial", 16), style='mainFrame.TLabel')
+title_label.grid(row=0, column=1, padx=10, pady=10)
 
 loadImageFrame = ttk.Frame(mainFrame, width=124, height=420, style='loadImageFrame.TFrame')
 loadImageFrame.grid(row=1, column=2, padx=10, pady=10, rowspan=3)
