@@ -5,7 +5,6 @@ from PIL import ImageTk, Image
 from functools import partial
 from PIL import Image, ImageOps
 
-
 # --------------- NORMALIZATION
 
 def applyTrimmedNormalization(image):
@@ -164,7 +163,13 @@ def convertToBlackAndWhite(container):
         image_label.photo = photo
         is_black_and_white = True
 
+def saveFile():
+    global filtered_image
 
+    if filtered_image:
+        save_path = filedialog.asksaveasfilename(defaultextension=".png")
+        if save_path:
+            filtered_image.save(save_path)
 
 def changeLanguage():
     current_language = changeToEnglishButton['text']
@@ -234,9 +239,6 @@ def applyHighPassFilter(image, kernel):
 
     return filtered_image
 
-
-
-
 def applyFilter():
     global original_image, filtered_image, filterHandler
 
@@ -290,11 +292,11 @@ def setFilter():
     filterHandler.config(mask, norm)
     applyFilter()
 
-
-
 # --------------- GUI window
 
 root = tk.Tk()
+root.title("Filtr Górnoprzepustowy")
+root.resizable(width=False, height=False)
 
 masksOptions = ["Maski", "Laplace 3x3", "Sobela poziomo", "Sobela pionowo", "Prewitta poziomo","Prewitta pionowo", "Różnicowa"]
 choosenMasksOption = tk.StringVar(root)
@@ -305,7 +307,6 @@ choosenNormalizationOption = tk.StringVar(root)
 choosenNormalizationOption.set(normalizationOptions[0])
 
 # --------------- STYLING
-
 styles = ttk.Style()
 styles.configure('mainFrame.TFrame', background='#e9ecef')
 styles.configure('loadImageFrame.TFrame', background='#e9ecef', height=420)
@@ -315,23 +316,20 @@ styles.configure('filteredPhotosFrame.TFrame', background='#e9ecef')
 styles.configure('custom.TButton', bg='#c1121f', foreground='black', padding=5, border=10, width=20)
 
 # --------------- WIDGETS
-
-
-
 mainFrame = ttk.Frame(root, width=1280, height=720, style='mainFrame.TFrame')
 mainFrame.grid(row=0, column=0)
 
 title_label = ttk.Label(mainFrame, text="Filtr górnoprzepustowy", font=("Arial", 16), style='mainFrame.TLabel')
-title_label.grid(row=0, column=1, padx=10, pady=10)
+title_label.grid(row=0, column=2, padx=10, pady=10)
 
 loadImageFrame = ttk.Frame(mainFrame, width=124, height=420, style='loadImageFrame.TFrame')
-loadImageFrame.grid(row=1, column=2, padx=10, pady=10, rowspan=3)
+loadImageFrame.grid(row=3, column=4, padx=10, pady=10, rowspan=3)
 
 buttonsFrame = ttk.Frame(mainFrame, width=900, height=50, style='buttonsFrame.TFrame')
-buttonsFrame.grid(row=1, column=1, padx=10, pady=10)
+buttonsFrame.grid(row=4, column=1, padx=10, pady=10, columnspan=3)
 
 photosFrame = ttk.Frame(mainFrame, width=900, height=350)
-photosFrame.grid(row=2, column=1, padx=10, pady=10)
+photosFrame.grid(row=3, column=1, padx=10, pady=10, columnspan=3)
 
 originalPhotoFrame = ttk.Frame(photosFrame, width=420, height=350, style='originalPhotosFrame.TFrame')
 originalPhotoFrame.grid(row=1, column=1, padx=10, pady=10)
@@ -340,7 +338,6 @@ filteredPhotoFrame = ttk.Frame(photosFrame, width=420, height=350, style='filter
 filteredPhotoFrame.grid(row=1, column=2, padx=10, pady=10)
 
 # --------------- BUTTONS
-
 changeToEnglishButton = ttk.Button(loadImageFrame, text="Angielski", style='custom.TButton', command=changeLanguage)
 changeToEnglishButton.grid(row=1, column=1, padx=10, pady=10)
 
@@ -350,20 +347,23 @@ loadFileButton.grid(row=2, column=1, padx=10, pady=10)
 filterButton = ttk.Button(loadImageFrame, text="Filtruj", style='custom.TButton', command=setFilter)
 filterButton.grid(row=3, column=1, padx=10, pady=10)
 
-saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton')
+saveFileButton = ttk.Button(loadImageFrame, text="Zapisz zdjęcie", style='custom.TButton', command=saveFile)
 saveFileButton.grid(row=4, column=1, padx=10, pady=10)
 
 blackAndWhiteButton = ttk.Button(buttonsFrame, text="Czarno-Białe", style='custom.TButton', command=partial(convertToBlackAndWhite, originalPhotoFrame))
-blackAndWhiteButton.grid(row=2, column=1, padx=10, pady=10)
+blackAndWhiteButton.grid(row=4, column=1, padx=10, pady=10)
 
 normalizeButton = ttk.OptionMenu(buttonsFrame, choosenNormalizationOption, *normalizationOptions, style='custom.TButton')
-normalizeButton.grid(row=2, column=2, padx=10, pady=10)
+normalizeButton.grid(row=4, column=2, padx=10, pady=10)
 
 masksMenu = ttk.OptionMenu(buttonsFrame, choosenMasksOption, *masksOptions, style='custom.TButton')
-masksMenu.grid(row=2, column=3, padx=10, pady=10)
+masksMenu.grid(row=4, column=3, padx=10, pady=10)
+
+root.mainloop()
+
+
 
 # --------------- GRID CONFIGURATIONS
 
-root.resizable(width=False, height=False)
 root.mainloop()
 
