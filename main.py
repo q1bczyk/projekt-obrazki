@@ -5,10 +5,10 @@ from PIL import ImageTk, Image
 from functools import partial
 from PIL import Image, ImageOps
 
+
 # --------------- NORMALIZATION
 
 def applyTrimmedNormalization(image):
-    # Wykonaj normalizację z obcięciem na obrazie
     width, height = image.size
     pixels = image.load()
 
@@ -16,7 +16,12 @@ def applyTrimmedNormalization(image):
     for x in range(width):
         for y in range(height):
             pixel = pixels[x, y]
-            values.extend(pixel)
+            if isinstance(pixel, int):
+                # Obraz czarno-biały (tryb "L")
+                values.append(pixel)
+            else:
+                # Obraz RGB
+                values.extend(pixel)
 
     values.sort()
     trimmed_values = values[int(0.1 * len(values)):int(0.9 * len(values))]
@@ -28,52 +33,82 @@ def applyTrimmedNormalization(image):
     for x in range(width):
         for y in range(height):
             pixel = pixels[x, y]
-            normalized_pixel = tuple(int(255 * (channel - min_value) / (max_value - min_value)) for channel in pixel)
+            if isinstance(pixel, int):
+                # Obraz czarno-biały (tryb "L")
+                normalized_pixel = int(255 * (pixel - min_value) / (max_value - min_value))
+            else:
+                # Obraz RGB
+                normalized_pixel = tuple(int(255 * (channel - min_value) / (max_value - min_value)) for channel in pixel)
             normalized_image.putpixel((x, y), normalized_pixel)
 
     return normalized_image
 
+
 def applyScaledNormalization(image):
-    # Wykonaj skalowanie na obrazie
     width, height = image.size
     pixels = image.load()
 
     min_value = float('inf')
     max_value = float('-inf')
+    if image.mode == "L":
+        # Obraz czarno-biały (tryb "L")
+        for x in range(width):
+            for y in range(height):
+                pixel = pixels[x, y]
+                min_value = min(min_value, pixel)
+                max_value = max(max_value, pixel)
+    elif image.mode == "RGB":
+        # Obraz RGB
+        for x in range(width):
+            for y in range(height):
+                pixel = pixels[x, y]
+                min_value = min(min_value, min(pixel))
+                max_value = max(max_value, max(pixel))
+
+    normalized_image = Image.new(image.mode, (width, height))
+
     for x in range(width):
         for y in range(height):
             pixel = pixels[x, y]
-            min_value = min(min_value, min(pixel))
-            max_value = max(max_value, max(pixel))
-
-    normalized_image = Image.new('RGB', (width, height))
-
-    for x in range(width):
-        for y in range(height):
-            pixel = pixels[x, y]
-            normalized_pixel = tuple(int(255 * (channel - min_value) / (max_value - min_value)) for channel in pixel)
+            if image.mode == "L":
+                normalized_pixel = int(255 * (pixel - min_value) / (max_value - min_value))
+            elif image.mode == "RGB":
+                normalized_pixel = tuple(int(255 * (channel - min_value) / (max_value - min_value)) for channel in pixel)
             normalized_image.putpixel((x, y), normalized_pixel)
 
     return normalized_image
+
 def applyAbsoluteNormalization(image):
     width, height = image.size
     pixels = image.load()
 
     max_value = 0
+    if image.mode == "L":
+        # Obraz czarno-biały (tryb "L")
+        for x in range(width):
+            for y in range(height):
+                pixel = pixels[x, y]
+                max_value = max(max_value, pixel)
+    elif image.mode == "RGB":
+        # Obraz RGB
+        for x in range(width):
+            for y in range(height):
+                pixel = pixels[x, y]
+                max_value = max(max_value, max(pixel))
+
+    normalized_image = Image.new(image.mode, (width, height))
+
     for x in range(width):
         for y in range(height):
             pixel = pixels[x, y]
-            max_value = max(max_value, max(pixel))
-
-    normalized_image = Image.new('RGB', (width, height))
-
-    for x in range(width):
-        for y in range(height):
-            pixel = pixels[x, y]
-            normalized_pixel = tuple(int(255 * channel / max_value) for channel in pixel)
+            if image.mode == "L":
+                normalized_pixel = int(255 * pixel / max_value)
+            elif image.mode == "RGB":
+                normalized_pixel = tuple(int(255 * channel / max_value) for channel in pixel)
             normalized_image.putpixel((x, y), normalized_pixel)
 
     return normalized_image
+
 
 # --------------- OPTIONS MODEL
 
@@ -129,6 +164,8 @@ def convertToBlackAndWhite(container):
         image_label.photo = photo
         is_black_and_white = True
 
+
+
 def changeLanguage():
     current_language = changeToEnglishButton['text']
     if current_language == "Angielski":
@@ -164,28 +201,42 @@ def applyHighPassFilter(image, kernel):
     width, height = image.size
     pixels = image.load()
 
-    filtered_image = Image.new('RGB', (width, height))
-
-    for x in range(1, width - 1):
-        for y in range(1, height - 1):
-            r_sum = 0
-            g_sum = 0
-            b_sum = 0
-
-            for i in range(-1, 2):
-                for j in range(-1, 2):
-                    pixel = pixels[x + i, y + j]
-                    r_sum += pixel[0] * kernel[(i + 1) * 3 + (j + 1)]
-                    g_sum += pixel[1] * kernel[(i + 1) * 3 + (j + 1)]
-                    b_sum += pixel[2] * kernel[(i + 1) * 3 + (j + 1)]
-
-            r_sum = max(min(int(r_sum), 255), 0)
-            g_sum = max(min(int(g_sum), 255), 0)
-            b_sum = max(min(int(b_sum), 255), 0)
-
-            filtered_image.putpixel((x, y), (r_sum, g_sum, b_sum))
+    if image.mode == "L":
+        # Obraz czarno-biały
+        filtered_image = Image.new('L', (width, height))
+        for x in range(1, width - 1):
+            for y in range(1, height - 1):
+                intensity_sum = 0
+                for i in range(-1, 2):
+                    for j in range(-1, 2):
+                        pixel = pixels[x + i, y + j]
+                        intensity_sum += pixel * kernel[(i + 1) * 3 + (j + 1)]
+                intensity_sum = max(min(int(intensity_sum), 255), 0)
+                filtered_image.putpixel((x, y), intensity_sum)
+    else:
+        # Obraz RGB
+        filtered_image = Image.new('RGB', (width, height))
+        for x in range(1, width - 1):
+            for y in range(1, height - 1):
+                r_sum = 0
+                g_sum = 0
+                b_sum = 0
+                for i in range(-1, 2):
+                    for j in range(-1, 2):
+                        pixel = pixels[x + i, y + j]
+                        r_sum += pixel[0] * kernel[(i + 1) * 3 + (j + 1)]
+                        g_sum += pixel[1] * kernel[(i + 1) * 3 + (j + 1)]
+                        b_sum += pixel[2] * kernel[(i + 1) * 3 + (j + 1)]
+                r_sum = max(min(int(r_sum), 255), 0)
+                g_sum = max(min(int(g_sum), 255), 0)
+                b_sum = max(min(int(b_sum), 255), 0)
+                filtered_image.putpixel((x, y), (r_sum, g_sum, b_sum))
 
     return filtered_image
+
+
+
+
 def applyFilter():
     global original_image, filtered_image, filterHandler
 
@@ -238,6 +289,8 @@ def setFilter():
     norm = choosenNormalizationOption.get()
     filterHandler.config(mask, norm)
     applyFilter()
+
+
 
 # --------------- GUI window
 
